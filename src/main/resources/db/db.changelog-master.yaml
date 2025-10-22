@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: db/migration/init-changelog.yaml

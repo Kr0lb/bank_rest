@@ -1,8 +1,20 @@
-#
-# application.yml — главный конфигурационный файл Spring Boot.
+jwt:
+  secret: ${JWT_SECRET:secret}
+auth:
+  refresh_token_life_seconds: 60
+  access_token_life_seconds: 1
 
-Что нужно сделать:
-  - Указать настройки подключения к базе данных.
-  - Указать порт приложения.
-  - Настроить параметры безопасности и JWT.
-  - Включить Swagger UI.
+spring:
+  application:
+    name: bankcards-service
+  datasource:
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: db/db.changelog-master.yaml
