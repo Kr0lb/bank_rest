@@ -1,10 +1,11 @@
 jwt:
-  secret: ${JWT_SECRET:secret}
-auth:
-  refresh_token_life_seconds: 60
-  access_token_life_seconds: 1
+  secret-key: ${JWT_SECRET:secret}
+  refresh_token_life: 60
+  access_token_life: 720000
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: bankcards-service
   datasource:
