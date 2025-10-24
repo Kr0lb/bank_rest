@@ -1,1 +1,441 @@
-# Здесь будет OpenAPI описание всех доступных эндпоинтов и моделей данных.
+openapi: 3.0.3
+info:
+  title: Card API
+  description: API для управления картами
+  version: "1.0.0"
+
+servers:
+  - url: ${openapi.url}
+
+paths:
+  /api/v1/cards/status/{cardId}:
+    patch:
+      tags:
+        - Cards Controller
+      summary: Изменить статус карты (только админ)
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [ ACTIVE, BLOCKED, EXPIRED ]
+      responses:
+        '200':
+          description: Статус карты успешно изменен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '403':
+          $ref: '#/components/responses/ErrorResponse403'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/cards:
+    get:
+      tags:
+        - Cards Controller
+      summary: Получить список всех карт (только для админа)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список карт с пагинацией
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardPageResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '403':
+          $ref: '#/components/responses/ErrorResponse403'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/cards/{cardId}:
+    delete:
+      tags:
+        - Cards Controller
+      summary: Удалить карту по ID (только админ)
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Карта успешно удалена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '403':
+          $ref: '#/components/responses/ErrorResponse403'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/cards/filter:
+    get:
+      tags:
+        - Cards Controller
+      summary: Получить карты пользователя с фильтром
+      parameters:
+        - name: number
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ ACTIVE, BLOCKED, EXPIRED ]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            example: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            example: 20
+      responses:
+        '200':
+          description: Список карт пользователя с фильтром
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardPageResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/cards/{cardId}/balance:
+    get:
+      tags:
+        - Cards Controller
+      summary: Получить баланс карты
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Баланс карты
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/cards/transfer:
+    post:
+      tags:
+        - Cards Controller
+      summary: Перевод между картами пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequestDto'
+      responses:
+        '200':
+          description: Перевод прошёл успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/cards/{cardId}/blocked:
+    patch:
+      tags:
+        - Cards Controller
+      summary: Заблокировать карту пользователем
+      parameters:
+        - name: cardId
+          in: path
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Карта успешно заблокирована
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/users/{userId}/cards:
+    post:
+      tags:
+        - Users Controller
+      summary: Создать карту для пользователя (только админ)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Карта успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '403':
+          $ref: '#/components/responses/ErrorResponse403'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/users/{userId}:
+    patch:
+      tags:
+        - Users Controller
+      summary: Обновить данные пользователя (только админ)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserByAdminRequest'
+      responses:
+        '200':
+          description: Данные пользователя успешно обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse400'
+        '403':
+          $ref: '#/components/responses/ErrorResponse403'
+        '401':
+          $ref: '#/components/responses/ErrorResponse401'
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Authorization Controller
+      summary: Аутентификация
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponseBadCredentials'
+
+security:
+  - BearerAuth: [ ]
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Операция успешно выполнена"
+
+    CardPageResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardResponse'
+
+    CardResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+        status:
+          type: string
+          enum: [ ACTIVE, INACTIVE, BLOCKED ]
+        balance:
+          type: number
+          format: double
+
+    TransferRequestDto:
+      type: object
+      properties:
+        cardFrom:
+          type: string
+          format: uuid
+        cardTo:
+          type: string
+          format: uuid
+        price:
+          type: number
+          format: double
+
+    UpdateUserByAdminRequest:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: Иван
+        lastName:
+          type: string
+          example: Иванов
+        middleName:
+          type: string
+          example: Иванович
+        phoneNumber:
+          type: string
+          example: 7453621946
+        email:
+          type: string
+          format: email
+          example: ivan@example.com
+        roles:
+          type: array
+          items:
+            type: string
+            example: USER
+        enabled:
+          type: boolean
+          example: true
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIx...
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Ошибка запроса
+
+  responses:
+    ErrorResponse401:
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                code: 401
+                message: Пользователь не авторизован
+
+    ErrorResponse403:
+      description: Доступ запрещен
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                code: 403
+                message: Доступ запрещен
+
+    ErrorResponse400:
+      description: Неверные параметры запроса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                code: 400
+                message: Неверные параметры запроса
+
+    ErrorResponseBadCredentials:
+      description: Неверный логин или пароль
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                code: 400
+                message: Неверный логин или пароль

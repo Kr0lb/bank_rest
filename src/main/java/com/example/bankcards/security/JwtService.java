@@ -1,13 +1,11 @@
 package com.example.bankcards.security;
 
-import com.example.bankcards.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.internal.Function;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +42,7 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        jwtExpiration *= 1000 * 60;
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
@@ -64,15 +63,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return ((username.equals(userDetails.getUsername())) && !isTokenExpired(token) && userDetails.isEnabled());
-    }
-
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        return ((username.equals(userDetails.getUsername())) && userDetails.isEnabled());
     }
 
     private Claims extractAllClaims(String token) {
@@ -88,7 +79,4 @@ public class JwtService {
         return new SecretKeySpec(this.secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }
 
-    public static User getUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
 }

@@ -1,11 +1,11 @@
 package com.example.bankcards.dto.request;
 
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@Getter
+@Data
 @SuperBuilder
 @NoArgsConstructor
 public class PageRequest {

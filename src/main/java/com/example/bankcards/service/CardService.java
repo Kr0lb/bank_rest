@@ -4,19 +4,23 @@ import com.example.bankcards.dto.request.CardFilterRequest;
 import com.example.bankcards.dto.response.CardPageResponse;
 import com.example.bankcards.dto.response.CardResponse;
 import com.example.bankcards.entity.Card;
-import com.example.bankcards.entity.Status;
+import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.entity.User;
+import com.example.bankcards.exception.CardNotFoundException;
+import com.example.bankcards.exception.CardStatusException;
+import com.example.bankcards.exception.NotEnoughFundsException;
+import com.example.bankcards.exception.UserNotFoundException;
 import com.example.bankcards.mapper.CardMapper;
 import com.example.bankcards.mapper.UserMapper;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.repository.specifications.CardSpecification;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,18 +36,27 @@ public class CardService {
     private final UserMapper userMapper;
     private final CardMapper cardMapper;
 
-    public void changeStatus(UUID cardId, Status status) {
+    public void changeStatus(UUID cardId, CardStatus status) {
+        Card card = cardRepository.findById(cardId).orElseThrow(() ->
+                new CardNotFoundException("Карта не найдена"));
+        card.setStatus(status);
+        cardRepository.save(card);
+    }
 
+    public void blockCard(UUID cardId, UUID userId) {
+        Card card = checkCard(cardId, userId);
+        card.setStatus(CardStatus.BLOCKED);
+        cardRepository.save(card);
     }
 
     public void create(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException("Пользователь не найден"));
+                new UserNotFoundException("Пользователь не найден"));
 
         Card card = new Card();
         card.setUser(user);
         card.setBalance(BigDecimal.ZERO);
-        card.setStatus(Status.ACTIVE);
+        card.setStatus(CardStatus.ACTIVE);
         card.setNumber(createNumber());
 
         cardRepository.save(card);
@@ -73,11 +86,12 @@ public class CardService {
                 cardMapper.toCardResponse(card, userMapper.toUserDto(card.getUser()))).toList();
 
         return CardPageResponse.builder().cards(cardResponses)
-                .page(cardPage.getNumber()).totalCount(cardPage.getTotalPages()).build();
+                .page(cardPage.getNumber() + 1).totalCount(cardPage.getTotalPages()).build();
     }
 
-    public CardPageResponse getCardByUser(String userId, CardFilterRequest request) {
-        Specification<Card> spec = Specification.where(CardSpecification.hasStatus(request.getStatus())
+    public CardPageResponse getCardByUserId(UUID userId, CardFilterRequest request) {
+        Specification<Card> spec = Specification.where(CardSpecification.hasUserId(userId)
+                .or(CardSpecification.hasStatus(request.getStatus()))
                 .or(CardSpecification.likeNumber(request.getNumber())));
 
         Page<Card> cardPage = cardRepository.findAll(spec,
@@ -87,16 +101,37 @@ public class CardService {
                 cardMapper.toCardResponse(card, userMapper.toUserDto(card.getUser()))).toList();
 
         return CardPageResponse.builder().cards(cardResponses)
-                .page(cardPage.getNumber()).totalCount(cardPage.getTotalPages()).build();
+                .page(cardPage.getNumber() + 1).totalCount(cardPage.getTotalPages()).build();
     }
 
     public BigDecimal getBalance(UUID userId, UUID cardId) {
-        return cardRepository.findCardBalanceByUser(userId, cardId).orElseThrow(() ->
-                new EntityNotFoundException("Карта не найдена"));
+        Card card = checkCard(cardId, userId);
+        return card.getBalance();
     }
 
-    public void transfer(UUID card1, UUID card2, BigDecimal price) {
+    @Transactional
+    public void transfer(UUID fromCardId, UUID toCardId, UUID userId, BigDecimal price) {
+        Card fromCard = checkCard(fromCardId, userId);
 
+        if (fromCard.getBalance().compareTo(price) < 0)
+            throw new NotEnoughFundsException("Недостаточно средств для перевода");
+
+        Card toCard = checkCard(toCardId, userId);
+
+        fromCard.setBalance(fromCard.getBalance().subtract(price));
+        toCard.setBalance(toCard.getBalance().add(price));
+    }
+
+    private Card checkCard(UUID cardId, UUID userId) {
+        Card card = cardRepository.findByCardIdAndUserId(cardId, userId).orElseThrow(() ->
+                new CardNotFoundException("Неизвестная карта"));
+
+        if (card.getStatus() == CardStatus.BLOCKED)
+            throw new CardStatusException("Карта заблокирована");
+        else if (card.getStatus() == CardStatus.EXPIRED)
+            throw new CardStatusException("Срок действия карты истек");
+
+        return card;
     }
 
 }

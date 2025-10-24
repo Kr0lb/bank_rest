@@ -81,7 +81,7 @@ databaseChangeLog:
                   name: id
                   type: UUID
               - column:
-                  name: name
+                  name: firstname
                   type: VARCHAR(50)
               - column:
                   name: lastname

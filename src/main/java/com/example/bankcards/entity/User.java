@@ -36,7 +36,7 @@ public class User {
     private UUID id;
 
     @Column(length = 50)
-    private String name;
+    private String firstname;
 
     @Column(length = 50)
     private String lastname;
@@ -47,7 +47,7 @@ public class User {
     @Column(length = 10)
     private String phoneNumber;
 
-    @Column(length = 30)
+    @Column(length = 30, unique = true)
     private String email;
 
     @Column(length = 100)
@@ -67,7 +67,7 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     public String getFio() {
-        return "%s %s".formatted(lastname, name);
+        return "%s %s".formatted(lastname, firstname);
     }
 
 }
