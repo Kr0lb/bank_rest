@@ -17,12 +17,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,7 +29,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "users")
 @AllArgsConstructor
-public class User implements UserDetails {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -54,8 +50,10 @@ public class User implements UserDetails {
     @Column(length = 30)
     private String email;
 
-    @Column(length = 20)
+    @Column(length = 100)
     private String password;
+
+    private boolean enabled;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private Set<Card> cards = new HashSet<>();
@@ -68,14 +66,8 @@ public class User implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
+    public String getFio() {
+        return "%s %s".formatted(lastname, name);
     }
 
 }

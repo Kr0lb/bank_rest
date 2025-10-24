@@ -34,6 +34,9 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(length = 19)
+    private String number;
+
     private LocalDate validityPeriod;
 
     @Enumerated(EnumType.ORDINAL)

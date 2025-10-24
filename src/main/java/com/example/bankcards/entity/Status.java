@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum Status {
+
     ACTIVE("Активна"), BLOCKED("Заблокирована"), EXPIRED("Истек срок действия");
 
     private final String value;

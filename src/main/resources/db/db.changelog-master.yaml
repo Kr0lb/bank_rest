@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/migration/init-changelog.yaml
   - include:
       file: db/migration/user-details-changelog.yaml
+  - include:
+      file: db/migration/user-card-changelog.yaml

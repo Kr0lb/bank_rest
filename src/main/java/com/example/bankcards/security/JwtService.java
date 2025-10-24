@@ -37,19 +37,14 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(CustomUserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
-        User user = (User) userDetails;
-        extraClaims.put("USER_ID", user.getId());
+        extraClaims.put("USER_ID", userDetails.getUserId());
         return generateToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
-    }
-
-    public long getExpirationTime() {
-        return jwtExpiration;
     }
 
     private String buildToken(
@@ -69,7 +64,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return ((username.equals(userDetails.getUsername())) && !isTokenExpired(token) && userDetails.isEnabled());
     }
 
     private boolean isTokenExpired(String token) {

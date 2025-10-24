@@ -1,6 +1,5 @@
 jwt:
   secret-key: ${JWT_SECRET:secret}
-  refresh_token_life: 60
   access_token_life: 720000
 
 spring:
