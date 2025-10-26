@@ -10,7 +10,9 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CardMapper {
 
+    @Mapping(target = "number", expression = "java(com.example.bankcards.util.Masking.maskingCard(card.getNumber()))")
     @Mapping(target = "owner", source = "user")
+    @Mapping(target = "id", source = "card.id")
     CardResponse toCardResponse(Card card, UserDto user);
 
 }
