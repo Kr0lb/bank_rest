@@ -1,7 +1,6 @@
 jwt:
   secret-key: ${JWT_SECRET:secret}
-  refresh_token_life: 60
-  access_token_life: 720000
+  access_token_life: ${JWT_EXPIRED:20}
 
 spring:
   config:
@@ -19,3 +18,14 @@ spring:
       ddl-auto: none
   liquibase:
     change-log: db/db.changelog-master.yaml
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+    resolve-schema-properties: true
+  swagger-ui:
+    url: /openapi.yaml
+    path: /index.html
+openapi:
+  url: ${OPENAPI_URL}

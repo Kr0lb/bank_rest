@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1761229805327-1
+      author: admin
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+            tableName: users
+  - changeSet:
+      id: 1761229805327-2
+      author: admin
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: enabled
+            tableName: users
+  - changeSet:
+      id: 1761229805327-3
+      author: admin
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: number
+                  type: VARCHAR(19)
+            tableName: cards
+
