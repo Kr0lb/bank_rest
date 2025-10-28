@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1761143190851-1
+      author: admin
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  type: VARCHAR(30)
+              - column:
+                  name: password
+                  type: VARCHAR(100)
+        - addUniqueConstraint:
+            columnNames: email
+            constraintName: uc_users_email
+            tableName: users

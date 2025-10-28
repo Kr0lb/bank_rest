@@ -1,0 +1,129 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1761134982076-1
+      author: Maksim Piva
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_cards
+                  name: id
+                  type: UUID
+              - column:
+                  name: validity_period
+                  type: DATE
+              - column:
+                  name: status
+                  type: SMALLINT
+              - column:
+                  name: balance
+                  type: DECIMAL(13, 3)
+              - column:
+                  name: user_id
+                  type: UUID
+            tableName: cards
+  - changeSet:
+      id: 1761134982076-2
+      author: Maksim Piva
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_roles
+                  name: id
+                  type: UUID
+              - column:
+                  name: name
+                  type: VARCHAR(30)
+            tableName: roles
+  - changeSet:
+      id: 1761134982076-3
+      author: Maksim Piva
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_user_roles
+                  name: role_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_user_roles
+                  name: user_id
+                  type: UUID
+            tableName: user_roles
+  - changeSet:
+      id: 1761134982076-4
+      author: Maksim Piva
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_users
+                  name: id
+                  type: UUID
+              - column:
+                  name: firstname
+                  type: VARCHAR(50)
+              - column:
+                  name: lastname
+                  type: VARCHAR(50)
+              - column:
+                  name: middle_name
+                  type: VARCHAR(50)
+              - column:
+                  name: phone_number
+                  type: VARCHAR(10)
+            tableName: users
+  - changeSet:
+      id: 1761134982076-5
+      author: Maksim Piva
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: cards
+            constraintName: FK_CARDS_ON_USER
+            referencedColumnNames: id
+            referencedTableName: users
+  - changeSet:
+      id: 1761134982076-6
+      author: Maksim Piva
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: role_id
+            baseTableName: user_roles
+            constraintName: fk_userol_on_role
+            referencedColumnNames: id
+            referencedTableName: roles
+  - changeSet:
+      id: 1761134982076-7
+      author: Maksim Piva
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: user_roles
+            constraintName: fk_userol_on_user
+            referencedColumnNames: id
+            referencedTableName: users
+

@@ -1,8 +1,31 @@
-#
-# application.yml — главный конфигурационный файл Spring Boot.
+jwt:
+  secret-key: ${JWT_SECRET:secret}
+  access_token_life: ${JWT_EXPIRED:20}
 
-Что нужно сделать:
-  - Указать настройки подключения к базе данных.
-  - Указать порт приложения.
-  - Настроить параметры безопасности и JWT.
-  - Включить Swagger UI.
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: bankcards-service
+  datasource:
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: db/db.changelog-master.yaml
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+    resolve-schema-properties: true
+  swagger-ui:
+    url: /openapi.yaml
+    path: /index.html
+openapi:
+  url: ${OPENAPI_URL}
